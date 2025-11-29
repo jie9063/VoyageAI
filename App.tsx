@@ -22,6 +22,21 @@ export default function App() {
   const [currentPrefs, setCurrentPrefs] = useState<UserPreferences | null>(null);
   const [initialPrefs, setInitialPrefs] = useState<UserPreferences | undefined>(undefined);
 
+  // Logo Loading Logic
+  const [logoSrc, setLogoSrc] = useState('/master.png');
+  const [logoState, setLogoState] = useState<'try-root' | 'try-public' | 'fallback'>('try-root');
+
+  const handleLogoError = () => {
+    if (logoState === 'try-root') {
+      console.log('Root path failed, trying public/master.png');
+      setLogoSrc('public/master.png');
+      setLogoState('try-public');
+    } else if (logoState === 'try-public') {
+      console.log('Public path failed, switching to SVG fallback');
+      setLogoState('fallback');
+    }
+  };
+
   // Load saved trips from LocalStorage on mount
   useEffect(() => {
     try {
@@ -115,8 +130,17 @@ export default function App() {
       <header className="bg-white/90 backdrop-blur-md sticky top-4 z-30 mx-4 mt-4 rounded-full shadow-lg shadow-amber-100/50 border border-white no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => { handleReset(); setActiveTab('planner'); }}>
-            <div className="bg-sky-50 rounded-full p-1 border-2 border-sky-100">
-               <CatCarLogo className="w-9 h-9" />
+            <div className="bg-sky-50 rounded-full p-1 border-2 border-sky-100 overflow-hidden">
+              {logoState === 'fallback' ? (
+                <CatCarLogo className="w-9 h-9" />
+              ) : (
+                <img 
+                  src={logoSrc} 
+                  onError={handleLogoError}
+                  alt="Logo" 
+                  className="w-9 h-9 object-contain"
+                />
+              )}
             </div>
             <span className="text-xl font-black text-sky-500 tracking-tight">
               Voyage<span className="text-pink-400">AI</span>

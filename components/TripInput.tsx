@@ -25,6 +25,19 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
   const [dietaryRestrictions, setDietaryRestrictions] = useState('無');
   const [specialRequests, setSpecialRequests] = useState('');
 
+  // Image Loading State
+  const [logoSrc, setLogoSrc] = useState('/master.png');
+  const [logoState, setLogoState] = useState<'try-root' | 'try-public' | 'fallback'>('try-root');
+
+  const handleLogoError = () => {
+    if (logoState === 'try-root') {
+      setLogoSrc('public/master.png');
+      setLogoState('try-public');
+    } else if (logoState === 'try-public') {
+      setLogoState('fallback');
+    }
+  };
+
   useEffect(() => {
     if (initialValues) {
       setOrigin(initialValues.origin || '台北');
@@ -75,8 +88,17 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
         <div className="absolute bottom-[-10px] right-10 w-20 h-20 bg-white opacity-10 rounded-full"></div>
         
         <h2 className="text-3xl font-black mb-3 flex items-center justify-center gap-3 relative z-10">
-          <div className="bg-white p-2 rounded-full shadow-md transform -rotate-6">
-             <CatCarLogo className="w-10 h-10" />
+          <div className="bg-white p-2 rounded-full shadow-md transform -rotate-6 overflow-hidden w-14 h-14 flex items-center justify-center">
+            {logoState === 'fallback' ? (
+              <CatCarLogo className="w-10 h-10" />
+            ) : (
+              <img 
+                src={logoSrc} 
+                onError={handleLogoError}
+                alt="Trip Icon" 
+                className="w-full h-full object-contain"
+              />
+            )}
           </div>
           開啟旅程
         </h2>
