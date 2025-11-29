@@ -140,10 +140,16 @@ export const generateItinerary = async (prefs: UserPreferences): Promise<Itinera
       try {
         const data = JSON.parse(cleanedText);
         
+        // Ensure critical arrays exist to prevent UI crashes
+        if (!data.days || !Array.isArray(data.days)) {
+            data.days = [];
+        }
+
         // Inject ID and timestamp for history tracking
-        const id = typeof crypto !== 'undefined' && crypto.randomUUID 
+        // Safe UUID generation for both secure and insecure contexts
+        const id = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
           ? crypto.randomUUID() 
-          : Date.now().toString() + Math.random().toString(36).substring(2);
+          : Date.now().toString(36) + Math.random().toString(36).substring(2);
 
         return {
           ...data,

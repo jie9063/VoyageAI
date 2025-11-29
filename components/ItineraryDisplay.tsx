@@ -106,6 +106,8 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary, p
     }
   };
 
+  if (!itinerary) return null;
+
   return (
     <div className="max-w-4xl mx-auto pb-24 print:pb-0">
       <div className="flex justify-between items-center mb-6 no-print px-2">
@@ -197,7 +199,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary, p
       </div>
 
       <div className="space-y-6">
-        {itinerary.days.map((day) => (
+        {(itinerary.days || []).map((day) => (
           <div key={day.day} className="bg-white rounded-[2rem] shadow-sm border-2 border-slate-50 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-sky-100 print:shadow-none print:break-inside-avoid print:overflow-visible group">
             <button 
               onClick={() => toggleDay(day.day)}

@@ -15,7 +15,6 @@ export default function App() {
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedTrips, setSavedTrips] = useState<Itinerary[]>([]);
-  const [logoError, setLogoError] = useState(false);
   
   // Track preferences
   const [currentPrefs, setCurrentPrefs] = useState<UserPreferences | null>(null);
@@ -114,16 +113,11 @@ export default function App() {
       <header className="bg-white/90 backdrop-blur-md sticky top-4 z-30 mx-4 mt-4 rounded-full shadow-lg shadow-amber-100/50 border border-white no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => { handleReset(); setActiveTab('planner'); }}>
-            {logoError ? (
-               <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center text-2xl border-2 border-white shadow-sm">🐱</div>
-            ) : (
-               <img 
-                 src="/master.png" 
-                 alt="Logo" 
-                 className="w-10 h-10 object-contain drop-shadow-sm" 
-                 onError={() => setLogoError(true)}
-               />
-            )}
+            <img 
+              src="/master.png" 
+              alt="Logo" 
+              className="w-10 h-10 object-contain drop-shadow-sm" 
+            />
             <span className="text-xl font-black text-sky-500 tracking-tight">
               Voyage<span className="text-pink-400">AI</span>
             </span>
