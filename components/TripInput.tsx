@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { UserPreferences } from '../types';
 import { MapPin, Calendar, Users, Wallet, Heart, Loader2, PlaneTakeoff, Car, Utensils, Flag } from 'lucide-react';
+import { CatCarLogo } from './CatCarLogo';
 
 interface TripInputProps {
   onSubmit: (prefs: UserPreferences) => void;
@@ -22,6 +24,19 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
   const [transportPreference, setTransportPreference] = useState('大眾運輸');
   const [dietaryRestrictions, setDietaryRestrictions] = useState('無');
   const [specialRequests, setSpecialRequests] = useState('');
+
+  // Image Loading State
+  const [logoSrc, setLogoSrc] = useState('/master.png');
+  const [logoState, setLogoState] = useState<'try-root' | 'try-public' | 'fallback'>('try-root');
+
+  const handleLogoError = () => {
+    if (logoState === 'try-root') {
+      setLogoSrc('public/master.png');
+      setLogoState('try-public');
+    } else if (logoState === 'try-public') {
+      setLogoState('fallback');
+    }
+  };
 
   useEffect(() => {
     if (initialValues) {
@@ -73,11 +88,18 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
         <div className="absolute bottom-[-10px] right-10 w-20 h-20 bg-white opacity-10 rounded-full"></div>
         
         <h2 className="text-3xl font-black mb-3 flex items-center justify-center gap-3 relative z-10">
-          <img 
-            src="/master.png" 
-            alt="Car" 
-            className="w-12 h-12 object-contain drop-shadow-md transform -rotate-6"
-          />
+          <div className="bg-white p-2 rounded-full shadow-md transform -rotate-6 overflow-hidden w-14 h-14 flex items-center justify-center">
+            {logoState === 'fallback' ? (
+              <CatCarLogo className="w-10 h-10" />
+            ) : (
+              <img 
+                src={logoSrc} 
+                onError={handleLogoError}
+                alt="Trip Icon" 
+                className="w-full h-full object-contain"
+              />
+            )}
+          </div>
           開啟旅程
         </h2>
         <p className="text-sky-100 font-medium relative z-10 text-lg">
