@@ -52,5 +52,6 @@ export interface SearchRecord {
   id: string;
   timestamp: number;
   locationName: string; // The query or detected address
+  radius: string; // e.g., "500m", "1km"
   results: NearbyPlace[];
 }

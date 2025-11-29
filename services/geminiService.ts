@@ -3,6 +3,7 @@ import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { Itinerary, UserPreferences, NearbyPlace } from "../types";
 
 // Initialize the Gemini API client
+// The API key must be obtained exclusively from the environment variable process.env.API_KEY.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Define the schema for the itinerary response
@@ -113,16 +114,17 @@ export const generateItinerary = async (prefs: UserPreferences): Promise<Itinera
   }
 };
 
-export const searchNearbyPlaces = async (location: string): Promise<NearbyPlace[]> => {
+export const searchNearbyPlaces = async (location: string, radius: string = '1km'): Promise<NearbyPlace[]> => {
   const prompt = `
-    請推薦位於或靠近 "${location}" 的 5 個美食餐廳和 5 個熱門景點/活動。
+    請推薦位於或靠近 "${location}" 且距離在「${radius}」範圍內的 5 個美食餐廳和 5 個熱門景點/活動。
     
     需求：
-    1. 包含當地人推薦的隱藏寶石和必去地點。
-    2. 提供具體的地址或街道名稱。
-    3. 預估價格請務必使用新台幣 (NT$)。
-    4. 評分請基於一般網路評價估算。
-    5. 請用繁體中文回答。
+    1. 地點必須盡量符合指定的距離範圍 (${radius})。如果是步行距離(如100m, 300m)，請推薦非常鄰近的店家。
+    2. 包含當地人推薦的隱藏寶石和必去地點。
+    3. 提供具體的地址或街道名稱。
+    4. 預估價格請務必使用新台幣 (NT$)。
+    5. 評分請基於一般網路評價估算。
+    6. 請用繁體中文回答。
   `;
 
   try {
@@ -132,7 +134,7 @@ export const searchNearbyPlaces = async (location: string): Promise<NearbyPlace[
       config: {
         responseMimeType: "application/json",
         responseSchema: nearbyResponseSchema,
-        systemInstruction: "You are a local guide expert. Recommend great places nearby. Always use NT$ for currency.",
+        systemInstruction: "You are a local guide expert. Recommend great places nearby within specific radius. Always use NT$ for currency.",
       }
     });
 
