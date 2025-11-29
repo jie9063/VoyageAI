@@ -3,7 +3,8 @@ const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/index.tsx',
-  '/manifest.json'
+  '/manifest.json',
+  '/icon.png'
 ];
 
 // Install Service Worker
