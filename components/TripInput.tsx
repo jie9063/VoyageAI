@@ -22,6 +22,7 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
   const [transportPreference, setTransportPreference] = useState('大眾運輸');
   const [dietaryRestrictions, setDietaryRestrictions] = useState('無');
   const [specialRequests, setSpecialRequests] = useState('');
+  const [iconError, setIconError] = useState(false);
 
   useEffect(() => {
     if (initialValues) {
@@ -73,7 +74,16 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
         <div className="absolute bottom-[-10px] right-10 w-20 h-20 bg-white opacity-10 rounded-full"></div>
         
         <h2 className="text-3xl font-black mb-3 flex items-center justify-center gap-3 relative z-10">
-          <img src="public/master.png" alt="Car" className="w-12 h-12 object-contain drop-shadow-md transform -rotate-6" />
+          {iconError ? (
+            <Car className="w-12 h-12 text-white transform -rotate-6" />
+          ) : (
+            <img 
+              src="/master.png" 
+              alt="Car" 
+              className="w-12 h-12 object-contain drop-shadow-md transform -rotate-6"
+              onError={() => setIconError(true)}
+            />
+          )}
           開啟旅程
         </h2>
         <p className="text-sky-100 font-medium relative z-10 text-lg">
