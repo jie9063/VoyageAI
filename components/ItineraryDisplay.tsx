@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
-import { Itinerary, Activity } from '../types';
-import { Clock, MapPin, DollarSign, ChevronDown, ChevronUp, Share2, Printer, ArrowLeft } from 'lucide-react';
+import { Itinerary, Activity, UserPreferences } from '../types';
+import { Clock, MapPin, DollarSign, ChevronDown, ChevronUp, Share2, Printer, ArrowLeft, Check, Plane, Wallet } from 'lucide-react';
 
 interface ItineraryDisplayProps {
   itinerary: Itinerary;
+  preferences: UserPreferences;
   onReset: () => void;
 }
 
@@ -21,10 +23,7 @@ const ActivityCard: React.FC<{ activity: Activity }> = ({ activity }) => {
 
   return (
     <div className="relative pl-8 pb-8 last:pb-0 group page-break-inside-avoid">
-      {/* Timeline line */}
       <div className="absolute left-[11px] top-8 bottom-0 w-0.5 bg-slate-200 group-last:hidden"></div>
-      
-      {/* Timeline dot */}
       <div className={`absolute left-0 top-1.5 w-6 h-6 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 ${getTypeColor(activity.type).replace('bg-', 'bg-').split(' ')[0]}`}>
         <div className="w-2 h-2 rounded-full bg-current opacity-50"></div>
       </div>
@@ -67,19 +66,49 @@ const ActivityCard: React.FC<{ activity: Activity }> = ({ activity }) => {
   );
 };
 
-export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary, onReset }) => {
+export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary, preferences, onReset }) => {
   const [expandedDay, setExpandedDay] = useState<number | null>(1);
+  const [justCopied, setJustCopied] = useState(false);
 
-  // In print mode, we want all days expanded usually, but for React state simple toggle is fine.
-  // CSS can force expansion if needed, but keeping JS simple.
-  
   const toggleDay = (day: number) => {
     setExpandedDay(expandedDay === day ? null : day);
   };
 
+  const handleShare = async () => {
+    const params = new URLSearchParams();
+    // Safe access to preferences with fallbacks
+    params.set('origin', preferences?.origin || '');
+    params.set('dest', preferences?.destination || '');
+    params.set('days', (preferences?.duration || 3).toString());
+    params.set('budget', (preferences?.budgetAmount || 20000).toString());
+    params.set('style', preferences?.travelStyle || '休閒');
+    params.set('who', preferences?.companions || '');
+    if (preferences?.interests?.length) {
+      params.set('tags', preferences.interests.join(','));
+    }
+
+    const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    const shareData = {
+      title: `VoyageAI: ${itinerary.tripName}`,
+      text: `來看看我用 VoyageAI 規劃的 ${itinerary.destination} 行程！`,
+      url: shareUrl
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setJustCopied(true);
+        setTimeout(() => setJustCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto pb-24 print:pb-0">
-      {/* Header Actions */}
       <div className="flex justify-between items-center mb-6 no-print">
         <button 
           onClick={onReset}
@@ -90,6 +119,26 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary, o
         </button>
         <div className="flex gap-2">
           <button 
+            onClick={handleShare}
+            className={`p-2 rounded-full transition-all flex items-center gap-2 px-3 ${
+              justCopied 
+                ? 'bg-green-100 text-green-700' 
+                : 'text-slate-500 hover:bg-slate-100'
+            }`}
+          >
+            {justCopied ? (
+              <>
+                <Check className="w-5 h-5" />
+                <span className="text-sm font-medium">已複製</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-5 h-5" />
+                <span className="text-sm hidden sm:inline">分享</span>
+              </>
+            )}
+          </button>
+          <button 
             onClick={() => window.print()}
             className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors" 
             title="列印行程"
@@ -99,32 +148,55 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary, o
         </div>
       </div>
 
-      {/* Hero Section */}
       <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden mb-8 print:shadow-none print:border print:border-slate-200">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-blue-800 to-indigo-900 opacity-90 print:hidden"></div>
-        
-        {/* Decorative Circles - hidden in print via CSS opacity or logic */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/2 print:hidden"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full translate-y-1/2 -translate-x-1/2 print:hidden"></div>
-
         <div className="relative p-8 md:p-12 text-white print:text-slate-900">
-          <div className="inline-block px-3 py-1 bg-blue-500/30 backdrop-blur-sm rounded-full text-xs font-bold tracking-wider mb-4 border border-white/20 print:border-slate-300 print:text-slate-600 print:bg-slate-100">
-            您的專屬行程
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="inline-block px-3 py-1 bg-blue-500/30 backdrop-blur-sm rounded-full text-xs font-bold tracking-wider border border-white/20 print:border-slate-300 print:text-slate-600 print:bg-slate-100">
+              您的專屬行程
+            </div>
+            {itinerary.totalEstimatedCost && (
+               <div className="inline-block px-3 py-1 bg-emerald-500/30 backdrop-blur-sm rounded-full text-xs font-bold tracking-wider border border-white/20 print:border-emerald-200 print:text-emerald-700 print:bg-emerald-50">
+                 總預算: {itinerary.totalEstimatedCost}
+               </div>
+            )}
           </div>
+          
           <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
             {itinerary.tripName}
           </h1>
-          <p className="text-blue-100 text-lg leading-relaxed max-w-2xl opacity-90 print:text-slate-600">
+          <p className="text-blue-100 text-lg leading-relaxed max-w-2xl opacity-90 print:text-slate-600 mb-6">
             {itinerary.summary}
           </p>
+
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 inline-flex flex-col sm:flex-row gap-6 print:bg-slate-50 print:border-slate-200">
+             <div className="flex items-center gap-3">
+               <div className="p-2 bg-blue-500/20 rounded-lg text-blue-200 print:text-blue-600">
+                 <Plane className="w-5 h-5" />
+               </div>
+               <div>
+                 <p className="text-xs text-blue-200 uppercase tracking-wider print:text-slate-500">預估交通</p>
+                 <p className="font-bold text-lg">{itinerary.estimatedTransportCost}</p>
+               </div>
+             </div>
+             {preferences && (
+               <div className="flex items-center gap-3">
+                 <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-200 print:text-emerald-600">
+                   <Wallet className="w-5 h-5" />
+                 </div>
+                 <div>
+                   <p className="text-xs text-blue-200 uppercase tracking-wider print:text-slate-500">設定總預算</p>
+                   <p className="font-bold text-lg">NT$ {preferences.budgetAmount.toLocaleString()}</p>
+                 </div>
+               </div>
+             )}
+          </div>
         </div>
       </div>
 
-      {/* Days List */}
       <div className="space-y-6">
         {itinerary.days.map((day) => (
-          <div key={day.day} className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden transition-all duration-300 print:shadow-none print:break-inside-avoid">
-            {/* Day Header */}
+          <div key={day.day} className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden transition-all duration-300 print:shadow-none print:break-inside-avoid print:overflow-visible">
             <button 
               onClick={() => toggleDay(day.day)}
               className="w-full text-left p-6 flex items-center justify-between hover:bg-slate-50 transition-colors print:pointer-events-none"
@@ -144,8 +216,12 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary, o
               </div>
             </button>
 
-            {/* Activities Timeline */}
-            <div className={`transition-all duration-500 ease-in-out ${expandedDay === day.day ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden print:max-h-none print:opacity-100'}`}>
+            {/* Force display in print by overriding hidden/height classes */}
+            <div className={`transition-all duration-500 ease-in-out ${
+              expandedDay === day.day 
+                ? 'max-h-[3000px] opacity-100' 
+                : 'max-h-0 opacity-0 overflow-hidden print:max-h-none print:opacity-100 print:overflow-visible'
+            }`}>
               <div className="p-6 pt-2 bg-slate-50/50 border-t border-slate-100 print:bg-white">
                 {day.activities.map((activity, idx) => (
                   <ActivityCard key={idx} activity={activity} />

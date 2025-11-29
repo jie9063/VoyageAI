@@ -16,19 +16,27 @@ export interface DayPlan {
 }
 
 export interface Itinerary {
+  id: string; // Unique ID for history
+  createdAt: number; // Timestamp
   destination: string;
   tripName: string;
   summary: string;
+  estimatedTransportCost: string; 
+  totalEstimatedCost: string; 
   days: DayPlan[];
 }
 
 export interface UserPreferences {
+  origin: string;
   destination: string;
   duration: number;
-  travelStyle: string; // e.g., Relaxed, Packed, Foodie, Adventure
-  budget: string; // e.g., Budget, Moderate, Luxury
-  companions: string; // e.g., Solo, Couple, Family, Friends
+  budgetAmount: number;
+  travelStyle: string;
+  companions: string;
   interests: string[];
+  transportPreference?: string;
+  dietaryRestrictions?: string;
+  specialRequests?: string;
 }
 
 export interface ChatMessage {
@@ -37,21 +45,20 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-// New Types for Nearby Search
 export interface NearbyPlace {
   name: string;
   type: 'restaurant' | 'attraction' | 'shop';
   description: string;
   address: string;
-  rating: string; // e.g., "4.5/5"
-  priceLevel: string; // e.g., "NT$200-400"
+  rating: string;
+  priceLevel: string;
   tags: string[];
 }
 
 export interface SearchRecord {
   id: string;
   timestamp: number;
-  locationName: string; // The query or detected address
-  radius: string; // e.g., "500m", "1km"
+  locationName: string;
+  radius: string;
   results: NearbyPlace[];
 }

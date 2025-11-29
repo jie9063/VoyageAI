@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
   <head>
@@ -19,10 +20,8 @@
       body {
         font-family: 'Noto Sans TC', sans-serif;
         background-color: #f8fafc;
-        /* Prevent pull-to-refresh on mobile which looks weird in standalone app */
         overscroll-behavior-y: none;
       }
-      /* Custom scrollbar for webkit */
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -40,34 +39,27 @@
 
       /* Print Styles */
       @media print {
-        @page {
-          margin: 1cm;
-          size: auto;
-        }
-        body {
-          background-color: white;
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
+        @page { margin: 0; size: auto; }
+        body, html {
+          height: auto !important;
+          overflow: visible !important;
+          background-color: white !important;
         }
         .no-print {
           display: none !important;
         }
-        /* Expand the itinerary container to full width */
         main {
           max-width: 100% !important;
-          padding: 0 !important;
+          width: 100% !important;
+          padding: 2cm !important;
           margin: 0 !important;
-        }
-        /* Hide scrollbars in print */
-        ::-webkit-scrollbar {
-          display: none;
+          box-shadow: none !important;
         }
         /* Ensure shadows and borders render nicely */
         * {
           box-shadow: none !important;
           text-shadow: none !important;
         }
-        /* Force page breaks */
         .page-break-inside-avoid {
           break-inside: avoid;
         }

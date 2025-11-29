@@ -3,7 +3,6 @@ import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { Itinerary, UserPreferences, NearbyPlace } from "../types";
 
 // Initialize the Gemini API client
-// The API key must be obtained exclusively from the environment variable process.env.API_KEY.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Define the schema for the itinerary response
@@ -11,24 +10,24 @@ const activitySchema: Schema = {
   type: Type.OBJECT,
   properties: {
     time: { type: Type.STRING, description: "Time of the activity (e.g., 09:00 AM)" },
-    activity: { type: Type.STRING, description: "Name of the activity or place" },
-    description: { type: Type.STRING, description: "Short detailed description of what to do there" },
-    location: { type: Type.STRING, description: "Address or area name" },
+    activity: { type: Type.STRING, description: "Specific Name of the activity, shop, or restaurant" },
+    description: { type: Type.STRING, description: "Description including why this place fits the user" },
+    location: { type: Type.STRING, description: "Specific Address or Area" },
     type: { 
       type: Type.STRING, 
       enum: ["food", "sightseeing", "relax", "travel", "shopping", "other"],
       description: "Category of the activity" 
     },
-    estimatedCost: { type: Type.STRING, description: "Estimated cost per person in New Taiwan Dollar (NT$)" }
+    estimatedCost: { type: Type.STRING, description: "Estimated cost per person in NT$" }
   },
-  required: ["time", "activity", "description", "location", "type"]
+  required: ["time", "activity", "description", "location", "type", "estimatedCost"]
 };
 
 const daySchema: Schema = {
   type: Type.OBJECT,
   properties: {
     day: { type: Type.INTEGER, description: "Day number (1, 2, 3...)" },
-    title: { type: Type.STRING, description: "Title for the day (e.g., 'Historical Center Tour')" },
+    title: { type: Type.STRING, description: "Title for the day" },
     theme: { type: Type.STRING, description: "Main theme of the day" },
     activities: { 
       type: Type.ARRAY, 
@@ -44,14 +43,16 @@ const itinerarySchema: Schema = {
   properties: {
     destination: { type: Type.STRING },
     tripName: { type: Type.STRING, description: "A creative name for this trip" },
-    summary: { type: Type.STRING, description: "A brief 2-3 sentence summary of the entire trip" },
+    summary: { type: Type.STRING, description: "A summary including budget analysis" },
+    estimatedTransportCost: { type: Type.STRING, description: "Estimated round-trip transport cost" },
+    totalEstimatedCost: { type: Type.STRING, description: "Total estimated cost for the whole trip" },
     days: { 
       type: Type.ARRAY, 
       items: daySchema,
       description: "Daily breakdown of the itinerary" 
     }
   },
-  required: ["destination", "tripName", "summary", "days"]
+  required: ["destination", "tripName", "summary", "days", "estimatedTransportCost", "totalEstimatedCost"]
 };
 
 // Schema for Nearby Places
@@ -61,9 +62,9 @@ const nearbyPlaceSchema: Schema = {
     name: { type: Type.STRING },
     type: { type: Type.STRING, enum: ['restaurant', 'attraction', 'shop'] },
     description: { type: Type.STRING, description: "Short appealing description" },
-    address: { type: Type.STRING, description: "Approximate address or street name" },
-    rating: { type: Type.STRING, description: "Estimated rating out of 5 (e.g. 4.5)" },
-    priceLevel: { type: Type.STRING, description: "Average cost in NT$ (e.g. NT$300/人)" },
+    address: { type: Type.STRING, description: "Approximate address" },
+    rating: { type: Type.STRING, description: "Rating (e.g. 4.5)" },
+    priceLevel: { type: Type.STRING, description: "Cost in NT$" },
     tags: { type: Type.ARRAY, items: { type: Type.STRING } }
   },
   required: ["name", "type", "description", "address", "rating", "priceLevel", "tags"]
@@ -79,17 +80,34 @@ const nearbyResponseSchema: Schema = {
 
 export const generateItinerary = async (prefs: UserPreferences): Promise<Itinerary> => {
   const prompt = `
-    我需要一個去 ${prefs.destination} 的旅遊行程規劃。
-    天數: ${prefs.duration} 天
-    旅遊風格: ${prefs.travelStyle}
-    預算: ${prefs.budget}
-    旅伴: ${prefs.companions}
-    特別興趣: ${prefs.interests.join(", ")}
+    請為我規劃一個去 ${prefs.destination} 的旅遊行程。
     
-    請生成一個詳細的每日行程，包括時間、地點、活動描述、活動類型和預估費用。
-    請用繁體中文回答 (Traditional Chinese).
-    所有價格請使用新台幣 (NT$) 估算。
-    確保內容豐富且邏輯通順，考慮交通時間。
+    【基本資訊】
+    出發地: ${prefs.origin}
+    天數: ${prefs.duration} 天
+    總預算 (每人): NT$ ${prefs.budgetAmount} (包含來回交通費與當地消費)
+    旅伴: ${prefs.companions}
+    旅遊風格: ${prefs.travelStyle}
+    
+    【詳細偏好】
+    當地交通方式: ${prefs.transportPreference}
+    飲食禁忌: ${prefs.dietaryRestrictions || "無"}
+    特別願望: ${prefs.specialRequests || "無"}
+    興趣: ${prefs.interests.join(", ")}
+    
+    【規劃要求】
+    1. **預算控制**: 
+       - 估算從「${prefs.origin}」到「${prefs.destination}」的來回交通成本。
+       - 從總預算中扣除交通費，剩餘的錢用於食宿。
+       - 務必提供 \`estimatedTransportCost\` 和 \`totalEstimatedCost\`。
+       
+    2. **具體性**:
+       - 必須給出**真實存在的店名**。
+       - 考慮 ${prefs.transportPreference} 的移動邏輯。
+
+    3. **格式**:
+       - 繁體中文。
+       - 價格使用新台幣 (NT$)。
   `;
 
   try {
@@ -99,12 +117,17 @@ export const generateItinerary = async (prefs: UserPreferences): Promise<Itinera
       config: {
         responseMimeType: "application/json",
         responseSchema: itinerarySchema,
-        systemInstruction: "You are an expert travel planner (旅遊規劃專家). Always respond in Traditional Chinese (Taiwan usage). Provide structured JSON output.",
       }
     });
 
     if (response.text) {
-      return JSON.parse(response.text) as Itinerary;
+      const data = JSON.parse(response.text);
+      // Inject ID and timestamp for history tracking
+      return {
+        ...data,
+        id: crypto.randomUUID(),
+        createdAt: Date.now()
+      };
     } else {
       throw new Error("No text response from Gemini");
     }
@@ -117,14 +140,7 @@ export const generateItinerary = async (prefs: UserPreferences): Promise<Itinera
 export const searchNearbyPlaces = async (location: string, radius: string = '1km'): Promise<NearbyPlace[]> => {
   const prompt = `
     請推薦位於或靠近 "${location}" 且距離在「${radius}」範圍內的 5 個美食餐廳和 5 個熱門景點/活動。
-    
-    需求：
-    1. 地點必須盡量符合指定的距離範圍 (${radius})。如果是步行距離(如100m, 300m)，請推薦非常鄰近的店家。
-    2. 包含當地人推薦的隱藏寶石和必去地點。
-    3. 提供具體的地址或街道名稱。
-    4. 預估價格請務必使用新台幣 (NT$)。
-    5. 評分請基於一般網路評價估算。
-    6. 請用繁體中文回答。
+    請用繁體中文回答，價格用 NT$。
   `;
 
   try {
@@ -134,7 +150,6 @@ export const searchNearbyPlaces = async (location: string, radius: string = '1km
       config: {
         responseMimeType: "application/json",
         responseSchema: nearbyResponseSchema,
-        systemInstruction: "You are a local guide expert. Recommend great places nearby within specific radius. Always use NT$ for currency.",
       }
     });
 
@@ -151,10 +166,10 @@ export const searchNearbyPlaces = async (location: string, radius: string = '1km
 };
 
 export const generateChatResponse = async (history: { role: string, parts: { text: string }[] }[], newMessage: string, tripContext?: Itinerary): Promise<string> => {
-  let systemInstruction = "You are a helpful travel assistant. Answer questions about travel, destinations, and logistics in Traditional Chinese.";
+  let systemInstruction = "You are a helpful travel assistant. Answer in Traditional Chinese.";
   
   if (tripContext) {
-    systemInstruction += `\n\nCurrent Trip Context:\nDestination: ${tripContext.destination}\nSummary: ${tripContext.summary}\nFull details are known to the user. Answer specific questions about this itinerary if asked.`;
+    systemInstruction += `\n\nCurrent Trip Context:\nDestination: ${tripContext.destination}\nSummary: ${tripContext.summary}\nTotal Cost: ${tripContext.totalEstimatedCost}`;
   }
 
   const chat = ai.chats.create({
