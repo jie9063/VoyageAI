@@ -1,11 +1,10 @@
 
-const CACHE_NAME = 'voyage-ai-v8';
+const CACHE_NAME = 'voyage-ai-v7';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icon.png',
-  '/master.png'
+  '/icon.png'
 ];
 
 // Install Service Worker
