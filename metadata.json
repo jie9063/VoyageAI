@@ -1,0 +1,7 @@
+{
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "name": "Copy of VoyageAI - 智能旅遊規劃師",
+  "description": "您的個人 AI 旅遊嚮導。輸入目的地、天數與喜好，立即生成包含景點、美食與交通建議的完整行程表。"
+}
