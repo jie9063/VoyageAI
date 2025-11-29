@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { TripInput } from './components/TripInput';
 import { ItineraryDisplay } from './components/ItineraryDisplay';
@@ -6,7 +5,7 @@ import { ChatAssistant } from './components/ChatAssistant';
 import { NearbySearch } from './components/NearbySearch';
 import { generateItinerary } from './services/geminiService';
 import { UserPreferences, Itinerary } from './types';
-import { Plane, Map, Compass, History as HistoryIcon, Trash2, ArrowRight, Calendar } from 'lucide-react';
+import { Plane, Map, Compass, History as HistoryIcon, Trash2, ArrowRight, CarFront } from 'lucide-react';
 
 type Tab = 'planner' | 'nearby' | 'history';
 
@@ -86,7 +85,6 @@ export default function App() {
   const loadTripFromHistory = (trip: Itinerary) => {
     setItinerary(trip);
     setActiveTab('planner');
-    // We try to reconstruct prefs roughly for the display, though some inputs might be lost
     setCurrentPrefs({
       origin: '未知',
       destination: trip.destination,
@@ -103,7 +101,6 @@ export default function App() {
     if (window.confirm("確定要刪除這個行程紀錄嗎？")) {
       setSavedTrips(prev => {
         const newTrips = prev.filter(t => t.id !== id);
-        // Also update local storage immediately to handle empty case
         if (newTrips.length === 0) localStorage.removeItem('voyage_trips');
         return newTrips;
       });
@@ -111,25 +108,27 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-100 flex flex-col">
+    <div className="min-h-screen bg-rose-50 text-slate-700 font-sans selection:bg-pink-200 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 no-print">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="bg-white/90 backdrop-blur-md sticky top-4 z-30 mx-4 mt-4 rounded-full shadow-lg shadow-pink-100/50 border border-white no-print">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => { handleReset(); setActiveTab('planner'); }}>
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-lg text-white">
-              <Plane className="w-5 h-5 transform -rotate-45" />
+            <div className="bg-sky-400 p-2 rounded-full text-white shadow-md shadow-sky-200">
+              <CarFront className="w-5 h-5" />
             </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
-              VoyageAI
+            <span className="text-xl font-black text-sky-500 tracking-tight">
+              Voyage<span className="text-pink-400">AI</span>
             </span>
           </div>
           
-          {/* Navigation */}
-          <div className="flex bg-slate-100 p-1 rounded-lg">
+          {/* Navigation - Pill shaped */}
+          <div className="flex bg-rose-50 p-1.5 rounded-full border border-pink-100">
             <button
               onClick={() => setActiveTab('planner')}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'planner' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
+                activeTab === 'planner' 
+                  ? 'bg-sky-400 text-white shadow-md shadow-sky-200' 
+                  : 'text-slate-500 hover:text-sky-400'
               }`}
             >
               <Map className="w-4 h-4" />
@@ -137,8 +136,10 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab('nearby')}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'nearby' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
+                activeTab === 'nearby' 
+                  ? 'bg-pink-400 text-white shadow-md shadow-pink-200' 
+                  : 'text-slate-500 hover:text-pink-400'
               }`}
             >
               <Compass className="w-4 h-4" />
@@ -146,8 +147,10 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'history' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
+                activeTab === 'history' 
+                  ? 'bg-emerald-400 text-white shadow-md shadow-emerald-200' 
+                  : 'text-slate-500 hover:text-emerald-400'
               }`}
             >
               <HistoryIcon className="w-4 h-4" />
@@ -158,10 +161,11 @@ export default function App() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex-grow w-full">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
         {error && (
-          <div className="max-w-2xl mx-auto mb-8 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-4 no-print">
-            {error}
+          <div className="max-w-2xl mx-auto mb-8 bg-red-50 border-2 border-red-200 text-red-600 px-6 py-4 rounded-3xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 no-print shadow-sm">
+            <div className="bg-red-200 p-1 rounded-full"><Trash2 className="w-4 h-4" /></div>
+            <span className="font-bold">{error}</span>
           </div>
         )}
 
@@ -169,12 +173,12 @@ export default function App() {
           <>
             {!itinerary ? (
               <div className="animate-in fade-in duration-500 slide-in-from-bottom-8">
-                <div className="text-center mb-12">
-                  <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
-                    規劃您的<span className="text-blue-600">精算旅程</span>
+                <div className="text-center mb-10">
+                  <h1 className="text-4xl md:text-5xl font-black text-slate-800 mb-4 tracking-tight">
+                    規劃您的<span className="text-sky-500 underline decoration-wavy decoration-pink-300 underline-offset-4">快樂旅程</span>
                   </h1>
-                  <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                    AI 自動估算預算、交通與食宿，打造專屬您的完美行程。
+                  <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
+                    讓 AI 幫您精打細算，開著小車車去旅行吧！
                   </p>
                 </div>
                 <TripInput onSubmit={handleTripSubmit} isLoading={isLoading} initialValues={initialPrefs} />
@@ -191,23 +195,23 @@ export default function App() {
 
         {activeTab === 'history' && (
           <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-            <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-              <HistoryIcon className="w-6 h-6 text-emerald-600" />
-              我的行程紀錄
+            <h2 className="text-2xl font-black mb-6 text-slate-800 flex items-center gap-2">
+              <div className="p-2 bg-emerald-100 rounded-full text-emerald-500"><HistoryIcon className="w-6 h-6" /></div>
+              我的足跡
             </h2>
             
             {savedTrips.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
-                <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Map className="w-8 h-8" />
+              <div className="text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-pink-200 shadow-sm">
+                <div className="w-20 h-20 bg-pink-50 text-pink-300 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Map className="w-10 h-10" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-700 mb-2">尚未有行程紀錄</h3>
-                <p className="text-slate-500 mb-6">您規劃過的行程會自動儲存在這裡。</p>
+                <h3 className="text-xl font-bold text-slate-700 mb-2">還沒有任何紀錄喔</h3>
+                <p className="text-slate-400 mb-8 font-medium">快去規劃您的第一個旅程吧！</p>
                 <button 
                   onClick={() => setActiveTab('planner')}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors"
+                  className="px-8 py-3 bg-sky-400 text-white rounded-full font-bold hover:bg-sky-500 transition-all shadow-lg shadow-sky-200 hover:shadow-sky-300 hover:-translate-y-1"
                 >
-                  去規劃行程
+                  開始出發
                 </button>
               </div>
             ) : (
@@ -216,45 +220,47 @@ export default function App() {
                   <div 
                     key={trip.id || Math.random().toString()} 
                     onClick={() => loadTripFromHistory(trip)}
-                    className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group relative"
+                    className="bg-white p-6 rounded-[2rem] shadow-sm border-2 border-white hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100 transition-all cursor-pointer group relative"
                   >
                     <div className="absolute top-4 right-4">
                        <button 
                          onClick={(e) => deleteTrip(e, trip.id)}
-                         className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                         className="p-2 text-slate-300 hover:text-red-400 hover:bg-red-50 rounded-full transition-colors"
                        >
-                         <Trash2 className="w-4 h-4" />
+                         <Trash2 className="w-5 h-5" />
                        </button>
                     </div>
 
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl shrink-0">
-                        {trip.days.length}
-                        <span className="text-xs font-normal ml-0.5 mt-1">天</span>
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className="w-14 h-14 rounded-2xl bg-sky-100 text-sky-500 flex flex-col items-center justify-center shrink-0 border-2 border-sky-50">
+                        <span className="text-xl font-black leading-none">{trip.days.length}</span>
+                        <span className="text-xs font-bold mt-1">天</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                        <h3 className="font-bold text-lg text-slate-800 line-clamp-1 group-hover:text-sky-500 transition-colors">
                           {trip.tripName}
                         </h3>
-                        <p className="text-sm text-slate-500">{trip.destination}</p>
+                        <p className="text-sm font-medium text-slate-400 flex items-center gap-1">
+                          <Map className="w-3 h-3" /> {trip.destination}
+                        </p>
                       </div>
                     </div>
                     
-                    <div className="space-y-2 mb-4">
+                    <div className="space-y-3 mb-4 bg-slate-50 p-4 rounded-xl">
                        <div className="flex items-center justify-between text-sm">
-                         <span className="text-slate-500">總預算</span>
-                         <span className="font-medium text-emerald-600">{trip.totalEstimatedCost}</span>
+                         <span className="text-slate-500 font-medium">總預算</span>
+                         <span className="font-bold text-emerald-500 bg-white px-2 py-0.5 rounded-md shadow-sm">{trip.totalEstimatedCost}</span>
                        </div>
                        <div className="flex items-center justify-between text-sm">
-                         <span className="text-slate-500">建立日期</span>
-                         <span className="text-slate-700">
+                         <span className="text-slate-500 font-medium">建立日期</span>
+                         <span className="text-slate-600 font-medium">
                            {trip.createdAt ? new Date(trip.createdAt).toLocaleDateString() : '未知'}
                          </span>
                        </div>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-50 flex items-center text-blue-600 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0 duration-300">
-                      查看完整行程 <ArrowRight className="w-4 h-4 ml-1" />
+                    <div className="flex items-center justify-center gap-1 text-sky-500 text-sm font-bold bg-sky-50 py-3 rounded-xl group-hover:bg-sky-400 group-hover:text-white transition-colors">
+                      查看行程 <ArrowRight className="w-4 h-4" />
                     </div>
                   </div>
                 ))}
@@ -264,10 +270,9 @@ export default function App() {
         )}
       </main>
 
-      <footer className="bg-white border-t border-slate-200 py-8 mt-12 no-print">
-        <div className="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
-          <p>© {new Date().getFullYear()} VoyageAI. All rights reserved.</p>
-          <p className="mt-2">AI 生成價格僅供參考，實際費用請以當下訂購為準。</p>
+      <footer className="py-8 mt-4 no-print text-center">
+        <div className="inline-block bg-white/50 backdrop-blur px-6 py-3 rounded-full border border-white/50">
+          <p className="text-slate-400 text-sm font-medium">© {new Date().getFullYear()} VoyageAI • 帶著好心情出發</p>
         </div>
       </footer>
 

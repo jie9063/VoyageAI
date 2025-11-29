@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { generateChatResponse } from '../services/geminiService';
 import { Itinerary, ChatMessage } from '../types';
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Sparkles } from 'lucide-react';
 
 interface ChatAssistantProps {
   itinerary: Itinerary | null;
@@ -10,7 +10,7 @@ interface ChatAssistantProps {
 export const ChatAssistant: React.FC<ChatAssistantProps> = ({ itinerary }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: '你好！我是您的旅遊助手。對這次行程有任何疑問嗎？我可以為您查詢交通、天氣或餐廳建議。', timestamp: Date.now() }
+    { role: 'model', text: '喵！我是您的旅遊小幫手。對這次行程有任何疑問嗎？我可以為您查詢交通、天氣或餐廳建議喔！', timestamp: Date.now() }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -33,7 +33,6 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({ itinerary }) => {
     setIsTyping(true);
 
     try {
-      // Format history for Gemini API
       const history = messages.map(m => ({
         role: m.role,
         parts: [{ text: m.text }]
@@ -49,7 +48,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({ itinerary }) => {
     } catch (error) {
       setMessages(prev => [...prev, {
         role: 'model',
-        text: "抱歉，連接發生錯誤，請稍後再試。",
+        text: "抱歉，連線有點問題，請稍後再試試喵！",
         timestamp: Date.now()
       }]);
     } finally {
@@ -69,52 +68,56 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({ itinerary }) => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 p-4 bg-indigo-600 text-white rounded-full shadow-2xl hover:bg-indigo-700 transition-all z-40 ${isOpen ? 'hidden' : 'flex'} items-center gap-2 group`}
+        className={`fixed bottom-6 right-6 p-4 bg-sky-400 text-white rounded-full shadow-xl shadow-sky-200 hover:bg-sky-500 hover:scale-105 transition-all z-40 ${isOpen ? 'hidden' : 'flex'} items-center gap-2 group border-4 border-white`}
       >
-        <MessageCircle className="w-6 h-6" />
-        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 font-medium whitespace-nowrap">
+        <MessageCircle className="w-7 h-7" />
+        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 font-bold whitespace-nowrap">
           行程諮詢
         </span>
       </button>
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-[90vw] md:w-[400px] h-[600px] max-h-[80vh] bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden border border-slate-200 animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <div className="fixed bottom-6 right-6 w-[90vw] md:w-[400px] h-[600px] max-h-[80vh] bg-white rounded-[2rem] shadow-2xl z-50 flex flex-col overflow-hidden border-4 border-white animate-in slide-in-from-bottom-10 fade-in duration-300">
           {/* Header */}
-          <div className="bg-indigo-600 p-4 text-white flex justify-between items-center shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="bg-white/20 p-1.5 rounded-full">
-                <Bot className="w-5 h-5" />
+          <div className="bg-sky-400 p-5 text-white flex justify-between items-center shrink-0 rounded-t-[1.5rem] relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-10 rounded-full -translate-y-10 translate-x-10"></div>
+            
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="bg-white p-2 rounded-full shadow-sm">
+                <Bot className="w-5 h-5 text-sky-500" />
               </div>
               <div>
-                <h3 className="font-bold text-sm">AI 旅遊助手</h3>
-                <p className="text-xs text-indigo-200">隨時為您解答</p>
+                <h3 className="font-black text-lg flex items-center gap-1">
+                  AI 旅遊助手 <Sparkles className="w-3 h-3 text-yellow-300 fill-current" />
+                </h3>
+                <p className="text-xs text-sky-100 font-medium">隨時為您解答</p>
               </div>
             </div>
             <button 
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-white/10 rounded-full transition-colors"
+              className="p-2 hover:bg-white/20 rounded-full transition-colors relative z-10"
             >
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6" />
             </button>
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+          <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-slate-50">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
                 className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                  msg.role === 'user' ? 'bg-slate-200 text-slate-600' : 'bg-indigo-100 text-indigo-600'
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border-2 border-white shadow-sm ${
+                  msg.role === 'user' ? 'bg-pink-100 text-pink-500' : 'bg-sky-100 text-sky-500'
                 }`}>
-                  {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                  {msg.role === 'user' ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
                 </div>
-                <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed ${
+                <div className={`max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed font-medium shadow-sm ${
                   msg.role === 'user' 
-                    ? 'bg-indigo-600 text-white rounded-tr-none' 
-                    : 'bg-white text-slate-700 shadow-sm border border-slate-100 rounded-tl-none'
+                    ? 'bg-pink-400 text-white rounded-tr-none shadow-pink-100' 
+                    : 'bg-white text-slate-600 border border-slate-100 rounded-tl-none'
                 }`}>
                   {msg.text}
                 </div>
@@ -122,13 +125,13 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({ itinerary }) => {
             ))}
             {isTyping && (
               <div className="flex gap-3">
-                 <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                   <Bot className="w-4 h-4" />
+                 <div className="w-9 h-9 rounded-full bg-sky-100 text-sky-500 flex items-center justify-center shrink-0 border-2 border-white">
+                   <Bot className="w-5 h-5" />
                  </div>
-                 <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 flex items-center gap-1">
-                   <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></div>
-                   <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-75"></div>
-                   <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-150"></div>
+                 <div className="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 flex items-center gap-1.5">
+                   <div className="w-2 h-2 bg-sky-400 rounded-full animate-bounce"></div>
+                   <div className="w-2 h-2 bg-sky-400 rounded-full animate-bounce delay-75"></div>
+                   <div className="w-2 h-2 bg-sky-400 rounded-full animate-bounce delay-150"></div>
                  </div>
               </div>
             )}
@@ -137,21 +140,21 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({ itinerary }) => {
 
           {/* Input Area */}
           <div className="p-4 bg-white border-t border-slate-100 shrink-0">
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all">
+            <div className="flex items-center gap-2 bg-slate-50 border-2 border-slate-100 rounded-full px-4 py-2 focus-within:ring-4 focus-within:ring-sky-100 focus-within:border-sky-300 transition-all">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
-                placeholder="詢問有關行程的問題..."
-                className="flex-1 bg-transparent outline-none text-sm text-slate-700 placeholder:text-slate-400"
+                placeholder="說點什麼喵..."
+                className="flex-1 bg-transparent outline-none text-sm font-bold text-slate-700 placeholder:text-slate-400 placeholder:font-normal"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isTyping}
                 className={`p-2 rounded-full transition-all ${
                   input.trim() && !isTyping 
-                    ? 'text-indigo-600 hover:bg-indigo-50' 
+                    ? 'text-sky-500 bg-sky-100 hover:bg-sky-200' 
                     : 'text-slate-300 cursor-not-allowed'
                 }`}
               >
