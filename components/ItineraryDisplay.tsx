@@ -226,9 +226,12 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary, p
                 : 'max-h-0 opacity-0 overflow-hidden print:max-h-none print:opacity-100 print:overflow-visible'
             }`}>
               <div className="p-6 pt-2 bg-white">
-                {day.activities.map((activity, idx) => (
+                {(day.activities || []).map((activity, idx) => (
                   <ActivityCard key={idx} activity={activity} />
                 ))}
+                {(!day.activities || day.activities.length === 0) && (
+                   <p className="text-center text-slate-400 py-4 font-bold">今天沒有安排特定活動，自由探索吧！</p>
+                )}
               </div>
             </div>
           </div>

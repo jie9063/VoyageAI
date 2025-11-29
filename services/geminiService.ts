@@ -79,7 +79,18 @@ const nearbyResponseSchema: Schema = {
 };
 
 const cleanJson = (text: string): string => {
-  return text.replace(/```json\n?|\n?```/g, '').trim();
+  // Remove markdown code blocks first
+  let content = text.replace(/```json\n?|```/g, '');
+  
+  // Robustly find the JSON object
+  const firstBrace = content.indexOf('{');
+  const lastBrace = content.lastIndexOf('}');
+  
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    return content.substring(firstBrace, lastBrace + 1);
+  }
+  
+  return content.trim();
 };
 
 export const generateItinerary = async (prefs: UserPreferences): Promise<Itinerary> => {
@@ -126,19 +137,23 @@ export const generateItinerary = async (prefs: UserPreferences): Promise<Itinera
 
     if (response.text) {
       const cleanedText = cleanJson(response.text);
-      const data = JSON.parse(cleanedText);
-      
-      // Inject ID and timestamp for history tracking
-      // Use crypto.randomUUID if available, otherwise fallback
-      const id = typeof crypto !== 'undefined' && crypto.randomUUID 
-        ? crypto.randomUUID() 
-        : Date.now().toString() + Math.random().toString(36).substring(2);
+      try {
+        const data = JSON.parse(cleanedText);
+        
+        // Inject ID and timestamp for history tracking
+        const id = typeof crypto !== 'undefined' && crypto.randomUUID 
+          ? crypto.randomUUID() 
+          : Date.now().toString() + Math.random().toString(36).substring(2);
 
-      return {
-        ...data,
-        id: id,
-        createdAt: Date.now()
-      };
+        return {
+          ...data,
+          id: id,
+          createdAt: Date.now()
+        };
+      } catch (parseError) {
+        console.error("Failed to parse Gemini response:", cleanedText);
+        throw new Error("無法解析行程資料，請重試。");
+      }
     } else {
       throw new Error("No text response from Gemini");
     }
@@ -166,8 +181,13 @@ export const searchNearbyPlaces = async (location: string, radius: string = '1km
 
     if (response.text) {
       const cleanedText = cleanJson(response.text);
-      const data = JSON.parse(cleanedText);
-      return data.places || [];
+      try {
+        const data = JSON.parse(cleanedText);
+        return data.places || [];
+      } catch (parseError) {
+        console.error("Failed to parse nearby places:", cleanedText);
+        return [];
+      }
     } else {
       throw new Error("No text response from Gemini");
     }

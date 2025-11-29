@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserPreferences } from '../types';
-import { MapPin, Calendar, Users, Wallet, Heart, Sparkles, Loader2, PlaneTakeoff, Car, Utensils, Flag } from 'lucide-react';
+import { MapPin, Calendar, Users, Wallet, Heart, Loader2, PlaneTakeoff, Car, Utensils, Flag } from 'lucide-react';
 
 interface TripInputProps {
   onSubmit: (prefs: UserPreferences) => void;
@@ -63,7 +63,7 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white rounded-[2.5rem] shadow-xl shadow-sky-100 border-4 border-white overflow-hidden relative">
+    <div className="w-full max-w-3xl mx-auto bg-amber-50 rounded-[2.5rem] shadow-xl shadow-sky-100 border-4 border-white overflow-hidden relative">
       {/* Decorative "Ears" or top accent */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-4 bg-sky-400 rounded-b-full opacity-20"></div>
 
@@ -73,7 +73,7 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
         <div className="absolute bottom-[-10px] right-10 w-20 h-20 bg-white opacity-10 rounded-full"></div>
         
         <h2 className="text-3xl font-black mb-3 flex items-center justify-center gap-3 relative z-10">
-          <Sparkles className="w-7 h-7 text-yellow-300 fill-current animate-pulse" />
+          <img src="public/master.png" alt="Car" className="w-12 h-12 object-contain drop-shadow-md transform -rotate-6" />
           開啟旅程
         </h2>
         <p className="text-sky-100 font-medium relative z-10 text-lg">
@@ -94,7 +94,7 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
               value={origin}
               onChange={(e) => setOrigin(e.target.value)}
               placeholder="例如：台北"
-              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-100 focus:border-sky-400 transition-all outline-none font-bold text-slate-700 placeholder:font-normal"
+              className="w-full px-6 py-4 bg-white border-2 border-amber-100 rounded-2xl focus:ring-4 focus:ring-sky-100 focus:border-sky-400 transition-all outline-none font-bold text-slate-700 placeholder:font-normal"
             />
           </div>
           <div className="space-y-3">
@@ -107,7 +107,7 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               placeholder="例如：日本京都"
-              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-pink-100 focus:border-pink-400 transition-all outline-none font-bold text-slate-700 placeholder:font-normal"
+              className="w-full px-6 py-4 bg-white border-2 border-amber-100 rounded-2xl focus:ring-4 focus:ring-pink-100 focus:border-pink-400 transition-all outline-none font-bold text-slate-700 placeholder:font-normal"
             />
           </div>
         </div>
@@ -210,7 +210,7 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
               <select
                 value={transportPreference}
                 onChange={(e) => setTransportPreference(e.target.value)}
-                className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-100 focus:border-sky-400 outline-none appearance-none font-bold text-slate-700"
+                className="w-full px-6 py-4 bg-white border-2 border-amber-100 rounded-2xl focus:ring-4 focus:ring-sky-100 focus:border-sky-400 outline-none appearance-none font-bold text-slate-700"
               >
                 <option>大眾運輸 (地鐵/公車)</option>
                 <option>租車自駕</option>
@@ -233,7 +233,7 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
               value={dietaryRestrictions}
               onChange={(e) => setDietaryRestrictions(e.target.value)}
               placeholder="如：不吃牛"
-              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-orange-100 focus:border-orange-400 outline-none font-bold text-slate-700 placeholder:font-normal transition-all"
+              className="w-full px-6 py-4 bg-white border-2 border-amber-100 rounded-2xl focus:ring-4 focus:ring-orange-100 focus:border-orange-400 outline-none font-bold text-slate-700 placeholder:font-normal transition-all"
             />
           </div>
         </div>
@@ -248,7 +248,7 @@ export const TripInput: React.FC<TripInputProps> = ({ onSubmit, isLoading, initi
             onChange={(e) => setSpecialRequests(e.target.value)}
             placeholder="例如：想去貓咪咖啡廳..."
             rows={2}
-            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-purple-100 focus:border-purple-400 outline-none resize-none font-bold text-slate-700 placeholder:font-normal transition-all"
+            className="w-full px-6 py-4 bg-white border-2 border-amber-100 rounded-2xl focus:ring-4 focus:ring-purple-100 focus:border-purple-400 outline-none resize-none font-bold text-slate-700 placeholder:font-normal transition-all"
           />
         </div>
 

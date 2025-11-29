@@ -5,7 +5,7 @@ import { ChatAssistant } from './components/ChatAssistant';
 import { NearbySearch } from './components/NearbySearch';
 import { generateItinerary } from './services/geminiService';
 import { UserPreferences, Itinerary } from './types';
-import { Plane, Map, Compass, History as HistoryIcon, Trash2, ArrowRight, CarFront } from 'lucide-react';
+import { Map, Compass, History as HistoryIcon, Trash2, ArrowRight } from 'lucide-react';
 
 type Tab = 'planner' | 'nearby' | 'history';
 
@@ -108,21 +108,19 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-rose-50 text-slate-700 font-sans selection:bg-pink-200 flex flex-col">
+    <div className="min-h-screen bg-amber-50 text-slate-700 font-sans selection:bg-sky-200 flex flex-col">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md sticky top-4 z-30 mx-4 mt-4 rounded-full shadow-lg shadow-pink-100/50 border border-white no-print">
+      <header className="bg-white/90 backdrop-blur-md sticky top-4 z-30 mx-4 mt-4 rounded-full shadow-lg shadow-amber-100/50 border border-white no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => { handleReset(); setActiveTab('planner'); }}>
-            <div className="bg-sky-400 p-2 rounded-full text-white shadow-md shadow-sky-200">
-              <CarFront className="w-5 h-5" />
-            </div>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => { handleReset(); setActiveTab('planner'); }}>
+            <img src="public/master.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-sm" />
             <span className="text-xl font-black text-sky-500 tracking-tight">
               Voyage<span className="text-pink-400">AI</span>
             </span>
           </div>
           
           {/* Navigation - Pill shaped */}
-          <div className="flex bg-rose-50 p-1.5 rounded-full border border-pink-100">
+          <div className="flex bg-amber-50 p-1.5 rounded-full border border-amber-100">
             <button
               onClick={() => setActiveTab('planner')}
               className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
@@ -201,8 +199,8 @@ export default function App() {
             </h2>
             
             {savedTrips.length === 0 ? (
-              <div className="text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-pink-200 shadow-sm">
-                <div className="w-20 h-20 bg-pink-50 text-pink-300 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-amber-200 shadow-sm">
+                <div className="w-20 h-20 bg-amber-50 text-amber-300 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Map className="w-10 h-10" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-700 mb-2">還沒有任何紀錄喔</h3>

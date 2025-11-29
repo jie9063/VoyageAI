@@ -272,7 +272,7 @@ export const NearbySearch: React.FC<NearbySearchProps> = () => {
                     <span className="break-words">{place.address}</span>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1">
-                    {place.tags.map(tag => (
+                    {(place.tags || []).map(tag => (
                       <span key={tag} className="px-3 py-1 bg-white border border-slate-100 text-slate-500 text-xs font-bold rounded-full">
                         #{tag}
                       </span>
