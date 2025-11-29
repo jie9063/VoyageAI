@@ -1,8 +1,8 @@
-
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { Itinerary, UserPreferences, NearbyPlace } from "../types";
 
 // Initialize the Gemini API client
+// The API key must be obtained exclusively from the environment variable process.env.API_KEY.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Define the schema for the itinerary response
@@ -78,6 +78,10 @@ const nearbyResponseSchema: Schema = {
   required: ["places"]
 };
 
+const cleanJson = (text: string): string => {
+  return text.replace(/```json\n?|\n?```/g, '').trim();
+};
+
 export const generateItinerary = async (prefs: UserPreferences): Promise<Itinerary> => {
   const prompt = `
     請為我規劃一個去 ${prefs.destination} 的旅遊行程。
@@ -121,11 +125,18 @@ export const generateItinerary = async (prefs: UserPreferences): Promise<Itinera
     });
 
     if (response.text) {
-      const data = JSON.parse(response.text);
+      const cleanedText = cleanJson(response.text);
+      const data = JSON.parse(cleanedText);
+      
       // Inject ID and timestamp for history tracking
+      // Use crypto.randomUUID if available, otherwise fallback
+      const id = typeof crypto !== 'undefined' && crypto.randomUUID 
+        ? crypto.randomUUID() 
+        : Date.now().toString() + Math.random().toString(36).substring(2);
+
       return {
         ...data,
-        id: crypto.randomUUID(),
+        id: id,
         createdAt: Date.now()
       };
     } else {
@@ -154,7 +165,8 @@ export const searchNearbyPlaces = async (location: string, radius: string = '1km
     });
 
     if (response.text) {
-      const data = JSON.parse(response.text);
+      const cleanedText = cleanJson(response.text);
+      const data = JSON.parse(cleanedText);
       return data.places || [];
     } else {
       throw new Error("No text response from Gemini");
